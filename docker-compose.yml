@@ -1,0 +1,29 @@
+version: '3.8'
+services:
+  oauth:
+    build:
+      context: ./oauth
+    container_name: oauth
+    working_dir: /app
+    command: node oauth-server.js
+    ports:
+      - "3000:3000"
+  sqlite-api:
+    build:
+      context: ./database
+    container_name: sqlite-api
+    volumes:
+      - ./database/database.db:/app/database.db
+    ports:
+      - "8000:8000"
+    depends_on:
+      - oauth
+  mcp-server:
+    build:
+      context: ./mcp_server
+    container_name: mcp-server
+    ports:
+      - "9000:9000"
+    depends_on:
+      - oauth
+      - sqlite-api
