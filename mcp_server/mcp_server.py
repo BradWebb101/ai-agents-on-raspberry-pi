@@ -24,25 +24,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.options("/.well-known/oauth-protected-resource")
-async def options_oauth_protected_resource():
-    return Response(status_code=204)
-
-@app.options("/.well-known/oauth-authorization-server")
-async def options_oauth_authorization_server():
-    return Response(status_code=204)
-
-app.mount("/.well-known", StaticFiles(directory="./well-known"), name="well-known")
-
-@app.middleware("http")
-async def check_auth(request: Request, call_next):
-    print(request.headers)
-    auth = request.headers.get("authorization")
-    print(f"[MCP SERVER] Authorization header: {auth}")
-    if not auth or not auth.startswith("Bearer demo-access-token"):
-        return Response("Invalid or missing token", status_code=403)
-    return await call_next(request)
-
 @mcp.tool()
 async def list_tables() -> List[str]:
     print("[MCP SERVER] list_tables called")
@@ -99,3 +80,6 @@ async def delete_row(table_name: str, row_id: int) -> Dict[str, Any]:
 
 app.mount("/", mcp.streamable_http_app())
 
+if __name__ == "__main__":
+    print("[MCP SERVER] Running MCP server...")
+    mcp.run(transport='streamable-http')

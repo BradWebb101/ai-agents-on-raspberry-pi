@@ -1,23 +1,12 @@
-version: '3.8'
 services:
-  oauth:
-    build:
-      context: ./oauth
-    container_name: oauth
-    working_dir: /app
-    command: node oauth-server.js
-    ports:
-      - "3000:3000"
   sqlite-api:
     build:
-      context: ./database
+      context: ./database/sqlite
     container_name: sqlite-api
     volumes:
-      - ./database/database.db:/app/database.db
+      - ./database/sqlite/database.db:/app/database.db
     ports:
       - "8000:8000"
-    depends_on:
-      - oauth
   mcp-server:
     build:
       context: ./mcp_server
@@ -25,5 +14,11 @@ services:
     ports:
       - "9000:9000"
     depends_on:
-      - oauth
       - sqlite-api
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: qdrant
+    ports:
+      - "6333:6333"
+    volumes:
+      - ./database/qdrant/data:/qdrant/data
