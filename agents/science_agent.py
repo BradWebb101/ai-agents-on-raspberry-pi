@@ -13,7 +13,7 @@ class ScienceAgent():
             llm=Ollama(model="tinyllama"),
             system_prompt=self.system_prompt
         )
-        self.qdrant_client = QdrantClient(host="localhost", port=6333)
+        self.qdrant_client = QdrantClient(host="http://localhost", port=6333)
 
         # Initialize Ollama Embedding
         self.ollama_embedding = OllamaEmbedding(
