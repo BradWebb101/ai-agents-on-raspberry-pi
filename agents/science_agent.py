@@ -32,7 +32,8 @@ class ScienceAgent():
             hits = self.qdrant_client.search(
                 collection_name="science",
                 query_vector=query_vector,
-                limit=2
+                limit=2,
+                timeout=30
             )
 
             if not hits:
