@@ -2,6 +2,8 @@ from llama_index.core.agent.workflow import FunctionAgent
 from llama_index.llms.ollama import Ollama
 from llama_index.embeddings.ollama import OllamaEmbedding
 from qdrant_client import QdrantClient
+import random
+
 
 class ScienceAgent():
     def __init__(self):
@@ -31,7 +33,7 @@ class ScienceAgent():
             print(f"PhilosophyAgent is searching the database with query: {user_query}")
             hits = self.qdrant_client.search(
                 collection_name="science",
-                query_vector=[0.0] * 768,
+                query_vector=[random.random() for _ in range(10)],
                 limit=1,
                 timeout=60
             )

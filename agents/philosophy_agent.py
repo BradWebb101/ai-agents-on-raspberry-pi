@@ -3,6 +3,7 @@ from llama_index.llms.ollama import Ollama
 from llama_index.embeddings.ollama import OllamaEmbedding
 
 from qdrant_client import QdrantClient
+import random
 
 
 class PhilosophyAgent():
@@ -17,23 +18,12 @@ class PhilosophyAgent():
         )
         self.qdrant_client = QdrantClient(host="localhost", port=6333, timeout=60)
 
-        # Initialize Ollama Embedding
-        self.ollama_embedding = OllamaEmbedding(
-            model_name="nomic-embed-text",
-            base_url="http://localhost:11434",
-            ollama_additional_kwargs={"mirostat": 0},
-        )
-
     def run(self, user_query, context={}):
         try:
-            # Query the database for additional context
-            # print(f"PhilosophyAgent is running with query: {user_query}")
-            # query_vector = self.ollama_embedding.get_query_embedding(user_query)
-
             print(f"PhilosophyAgent is searching the database with query: {user_query}")
             hits = self.qdrant_client.search(
                 collection_name="philosophy",
-                query_vector=[0.0] * 768,
+                query_vector=[random.random() for _ in range(10)],
                 limit=1,
                 timeout=60
             )
