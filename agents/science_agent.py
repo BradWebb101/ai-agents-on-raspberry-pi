@@ -25,13 +25,13 @@ class ScienceAgent():
 
     def run(self, user_query, context={}):
         try:
-            print(f"PhilosophyAgent is running with query: {user_query}")
-            query_vector = self.ollama_embedding.get_query_embedding(user_query)
+            # print(f"PhilosophyAgent is running with query: {user_query}")
+            # query_vector = self.ollama_embedding.get_query_embedding(user_query)
 
             print(f"PhilosophyAgent is searching the database with query: {user_query}")
             hits = self.qdrant_client.search(
                 collection_name="science",
-                query_vector=query_vector,
+                query_vector=[0.0] * 768,
                 limit=1,
                 timeout=60
             )
