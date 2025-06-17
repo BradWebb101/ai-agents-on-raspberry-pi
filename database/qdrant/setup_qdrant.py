@@ -34,7 +34,7 @@ def setup_qdrant_with_data():
                 # Create collection if it doesn't exist
                 qdrant_client.recreate_collection(
                     collection_name=collection,
-                    vectors_config=VectorParams(size=5, distance=Distance.COSINE)
+                    vectors_config=VectorParams(size=2, distance=Distance.COSINE)
                 )
             file_path = os.path.join(data_dir, filename)
             with open(file_path, "r") as f:
