@@ -44,7 +44,7 @@ def setup_qdrant_with_data():
             points = []
             for i, chunk in enumerate(chunks):
                 point_id = str(uuid.uuid4())  # Convert UUID to string for valid PointStruct ID
-                points.append(PointStruct(id=point_id, vector=[random.random() for _ in range(5)], payload={"text": chunk}))
+                points.append(PointStruct(id=point_id, vector=[random.random() for _ in range(2)], payload={"text": chunk}))
             qdrant_client.upsert(collection_name=collection, points=points)
             logging.info(f"Inserted {len(points)} points into {collection}")
 

@@ -33,7 +33,7 @@ class ScienceAgent():
             print(f"PhilosophyAgent is searching the database with query: {user_query}")
             hits = self.qdrant_client.search(
                 collection_name="science",
-                query_vector=[random.random() for _ in range(5)],
+                query_vector=[random.random() for _ in range(2)],
                 limit=1,
                 timeout=60
             )
