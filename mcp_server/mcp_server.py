@@ -9,7 +9,6 @@ from typing import Any, Dict, List
 import mcp
 
 DATABASE_API_URL = "http://sqlite-api:8000"
-OAUTH_SERVER_URL = "http://oidc:3000"  # Use service name in Docker, or localhost if running locally
 
 print("[MCP SERVER] Starting FastAPI app...")
 
