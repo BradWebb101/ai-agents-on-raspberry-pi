@@ -20,12 +20,15 @@ def check_qdrant_collections():
                 results = client.search(
                     collection_name=name,
                     query_vector=[0.0]*5,  # Dummy vector, just to get some results
-                    limit=1
+                    limit=1,
+                    with_payload=True,
+                    with_vectors=True
                 )
                 for hit in results:
                     print(f"Sample payload from '{name}': {hit.payload}")
+                    print(f"Sample vector from '{name}': {hit.vector}")
         except Exception as e:
             print(f"Error checking collection '{name}': {e}")
 
 if __name__ == "__main__":
-    check_qdrant_collections() 
+    check_qdrant_collections()
