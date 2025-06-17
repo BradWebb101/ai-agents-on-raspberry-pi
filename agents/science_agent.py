@@ -38,7 +38,7 @@ class ScienceAgent():
                 paragraphs = [p.strip() for p in text.split('\n\n') if p.strip()]
                 database_context = random.choice(paragraphs) if paragraphs else '[MOCK RAG DATA]'
             else:
-                print(f"PhilosophyAgent is searching the database with query: {user_query}")
+                print(f"ScienceAgent is searching the database with query: {user_query}")
                 hits = self.qdrant_client.search(
                     collection_name="science",
                     query_vector=[random.random() for _ in range(2)],
@@ -53,6 +53,7 @@ class ScienceAgent():
                 database_context = " | ".join([hit.payload.get("text", "") for hit in hits])
 
             # Combine user query, database context, and additional context
+            print(f"ScienceAgent is running with query: {user_query}")
             response = self.agent.llm.complete(f"{user_query}. Context: {database_context}. Additional Context: {context}")
             print(response)
             return response

@@ -48,7 +48,6 @@ class SupervisorAgent:
             if not isinstance(state["current_question"], str):
                 state["current_question"] = str(state["current_question"])
 
-
             agent_response = await asyncio.to_thread(next_agent.run, state["current_question"])
             state["debate_log"].append(f"{next_agent_name+'agent_response'+str(turn_count)}: {agent_response}")
             
