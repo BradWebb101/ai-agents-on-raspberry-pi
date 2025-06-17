@@ -23,8 +23,8 @@ def setup_qdrant_with_data():
     file_to_collection = {
         "consciousness_philosophy.txt": "philosophy",
         "consciousness_science.txt": "science",
-        # "freewill_philosophy.txt": "philosophy",
-        # "freewill_science.txt": "science",
+        "freewill_philosophy.txt": "philosophy",
+        "freewill_science.txt": "science",
     }
     for filename in os.listdir(data_dir):
         if filename.endswith(".txt"):
