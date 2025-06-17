@@ -3,7 +3,7 @@ import os
 import random
 import string
 
-DB_PATH = os.path.join(os.path.dirname(__file__), '../database/sqlite/database.db')
+DB_PATH = os.path.join(os.path.dirname(__file__), './database.db')
 
 # Table definitions for an e-commerce business
 TABLES = {
