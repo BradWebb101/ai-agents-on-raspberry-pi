@@ -5,7 +5,7 @@ import time
 class SummaryAgent():
     def __init__(self):
         self.name = 'SummaryAgent'
-        self.system_prompt = 'You are a 5 word summary agent, summarize to 5 words only'
+        self.system_prompt = 'You are a summary agent, you send back short and consise summaries no longer than 20 words'
         self.agent = FunctionAgent(
             name=self.name,
             description='You are a summary agent, you send back short and consise summaries',
@@ -15,12 +15,9 @@ class SummaryAgent():
 
     def run(self, user_query, context={}):
         try:
-            print(self.agent.system_prompt)
-            time.sleep(5)
-            print('Sleeping for 5 seconds to cool the cpu')
-            response = self.agent.llm.complete(f"{user_query}. ")
-            print('Summary')
-            print('='*20)
+
+            response = self.agent.llm.complete(f"{user_query}. Give a summary back no longer than 20 words")
+            print('Summary Agent has a response')
             print(response)
             return response
         except Exception as e:

@@ -51,17 +51,13 @@ class SupervisorAgent:
             agent_response = await asyncio.to_thread(next_agent.run, state["current_question"])
             state["debate_log"].append(f"{next_agent_name+'agent_response'+str(turn_count)}: {agent_response}")
             
-            print(f'{next_agent.name} has a response')
-            print('='*20)
             summary_agent_response = await asyncio.to_thread(self.summary_agent.run, agent_response)
-            print(f"Summary: {summary_agent_response}")
             state["debate_log"].append(f"{next_agent_name+'agent_summary'+str(turn_count)}: {summary_agent_response}")
 
             # Alternate the next agent name
             next_agent_name = "ScienceAgent" if next_agent_name == "PhilosophyAgent" else "PhilosophyAgent"
 
             turn_count += 1
-            print('='*20)
 
         # Generate a UUID for the filename
         file_uuid = str(uuid.uuid4())

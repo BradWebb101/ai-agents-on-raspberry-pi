@@ -42,6 +42,8 @@ class PhilosophyAgent():
 
             print(f"PhilosophyAgent is running with query: {user_query} + {database_context}")
             response = self.agent.llm.complete(f"{user_query}. Context: {database_context}")
+            print('Response from PhilosophyAgent')
+            print(response)
             return response
         except Exception as e:
             print(f"[ERROR] PhilosophyAgent encountered an error: {e}")
