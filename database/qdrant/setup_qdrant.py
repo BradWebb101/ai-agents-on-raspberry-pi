@@ -21,8 +21,8 @@ def setup_qdrant_with_data():
     qdrant_client = QdrantClient(host="localhost", port=6333)
     data_dir = os.path.join(os.path.dirname(__file__), 'data')
     file_to_collection = {
-        "consciousness_philosophy.txt": "philosophy",
-        "consciousness_science.txt": "science",
+        # "consciousness_philosophy.txt": "philosophy",
+        # "consciousness_science.txt": "science",
         "freewill_philosophy.txt": "philosophy",
         "freewill_science.txt": "science",
     }
