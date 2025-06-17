@@ -11,12 +11,12 @@ import uuid
 import random
 
 class SupervisorAgent:
-    def __init__(self):
+    def __init__(self, mock_rag=False):
         load_dotenv()
         self.qdrant_client = QdrantClient(host="localhost", port=6333)
 
-        self.philosophy_agent = PhilosophyAgent() 
-        self.science_agent = ScienceAgent() 
+        self.philosophy_agent = PhilosophyAgent(mock_rag=mock_rag)
+        self.science_agent = ScienceAgent(mock_rag=mock_rag)
         self.summary_agent = SummaryAgent()
 
         self.supervisor_agent = FunctionAgent(
@@ -26,18 +26,6 @@ class SupervisorAgent:
             system_prompt="You are a neutral debate moderator.",
             can_handoff_to=["PhilosophyAgent", "ScienceAgent"]
         )
-    
-    
-    def run(self, user_query, context={}):
-        try:
-            response = self.agent.llm.complete(f"{user_query}. last debate response summary: {context}")
-            print('Supervisor')
-            print('='*20)
-            print(response)
-            return response
-        except Exception as e:
-            print(f"[ERROR] ScienceAgent encountered an error: {e}")
-            return "Error occurred while processing the query."
 
     async def orchestrate_debate(self, question: str):
         """
@@ -60,45 +48,18 @@ class SupervisorAgent:
             if not isinstance(state["current_question"], str):
                 state["current_question"] = str(state["current_question"])
 
-            agent_context = state.get("agent_context", {})
-            agent_response = await asyncio.to_thread(next_agent.run, state["current_question"], agent_context)
+
+            agent_response = await asyncio.to_thread(next_agent.run, state["current_question"])
             state["debate_log"].append(f"{next_agent_name+'agent_response'+str(turn_count)}: {agent_response}")
             
             print(f'{next_agent.name} has a response')
             print('='*20)
             summary_agent_response = await asyncio.to_thread(self.summary_agent.run, agent_response)
-            state["debate_log"].append(f"{next_agent_name+'agent_summary'+str(turn_count)}: {agent_response}")
-            
-            
-            # Update the current question with the summarized response
-            state["current_question"] = summary_agent_response
-            state["agent_context"] = agent_context
+            print(f"Summary: {summary_agent_response}")
+            state["debate_log"].append(f"{next_agent_name+'agent_summary'+str(turn_count)}: {summary_agent_response}")
 
             # Alternate the next agent name
             next_agent_name = "ScienceAgent" if next_agent_name == "PhilosophyAgent" else "PhilosophyAgent"
-
-            # # Add a 35% chance for the moderator to jump in with a clarifying question
-            # if random.random() < 0.20:
-                
-            #     random_additions = random.choice([
-            #     "Let's keep the discussion focused and respectful.",
-            #     "Can we explore that idea further?",
-            #     "Please clarify your argument for the audience."
-            #     ])
-            #     clarifying_question = random_additions
-            #     print("Moderator jumps in with a clarifying question.")
-            #     print('='*20)
-            #     print('clarifying_question')
-            #     agent_response = await asyncio.to_thread(next_agent.run, clarifying_question, agent_context)
-            #     summary_agent_response = await asyncio.to_thread(self.summary_agent.run, agent_response)
-
-            #     state["debate_log"].append(f"Moderator: {clarifying_question}")
-            #     state["debate_log"].append(f"{next_agent_name}: {agent_response}")
-            #     state["current_question"] = summary_agent_response
-            #     state["agent_context"] = agent_context
-            #     turn_count += 1
-            #     print('='*20)
-            #     continue
 
             turn_count += 1
             print('='*20)
