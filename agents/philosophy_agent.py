@@ -15,7 +15,7 @@ class PhilosophyAgent():
             llm=Ollama(model="tinyllama"),
             system_prompt=self.system_prompt
         )
-        self.qdrant_client = QdrantClient(host="ocalhost", port=6333, timeout=60)
+        self.qdrant_client = QdrantClient(host="localhost", port=6333, timeout=60)
 
         # Initialize Ollama Embedding
         self.ollama_embedding = OllamaEmbedding(
