@@ -4,7 +4,7 @@ from llama_index.llms.ollama import Ollama
 class SummaryAgent():
     def __init__(self):
         self.name = 'SummaryAgent'
-        self.system_prompt = 'You are a helpful summary agent, you return summaries of the conversation no longer than 40 words'
+        self.system_prompt = 'You are a 5 word summary agent, summarize to 5 words only'
         self.agent = FunctionAgent(
             name=self.name,
             description='You are a summary agent, you send back short and consise summaries',
@@ -14,6 +14,7 @@ class SummaryAgent():
 
     def run(self, user_query, context={}):
         try:
+            print(self.agent.system_prompt)
             # Combine user query, database context, and additional context
             response = self.agent.llm.complete(f"{user_query}. ")
             print('Summary')

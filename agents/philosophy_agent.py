@@ -32,7 +32,7 @@ class PhilosophyAgent():
             hits = self.qdrant_client.search(
                 collection_name="philosophy",
                 query_vector=query_vector,
-                limit=5
+                limit=2
             )
             if not hits:
                 print("[ERROR] No hits found in the database.")
