@@ -27,30 +27,21 @@ class ScienceAgent():
         )
         
 
-    def run(self, user_query, context={}):
+    def run(self, user_query):
         try:
-            if self.mock_rag:
-                # Load and select a random paragraph from freewill_science.txt
-                data_path = os.path.join(os.path.dirname(__file__), '../database/qdrant/data/freewill_science.txt')
-                data_path = os.path.abspath(data_path)
-                with open(data_path, 'r') as f:
-                    text = f.read()
-                paragraphs = [p.strip() for p in text.split('\n\n') if p.strip()]
-                database_context = random.choice(paragraphs) if paragraphs else '[MOCK RAG DATA]'
-            else:
-                print(f"ScienceAgent is searching the database with query: {user_query}")
-                hits = self.qdrant_client.search(
-                    collection_name="science",
-                    query_vector=[random.random() for _ in range(50)],
-                    limit=1,
-                    timeout=60
-                )
+            print(f"ScienceAgent is searching the database with query: {user_query}")
+            hits = self.qdrant_client.search(
+                collection_name="science",
+                query_vector=self.ollama_embedding.get_query_embedding(user_query),
+                limit=1,
+                timeout=60
+            )
 
-                if not hits:
-                    print("[ERROR] No hits found in the database.")
-                    return "No relevant data found in the database."
+            if not hits:
+                print("[ERROR] No hits found in the database.")
+                return "No relevant data found in the database."
 
-                database_context = " | ".join([hit.payload.get("text", "") for hit in hits])
+            database_context = " | ".join([hit.payload.get("text", "") for hit in hits])
 
             # Combine user query, database context, and additional context
             print(f"ScienceAgent is running with query: {user_query} + {database_context}")

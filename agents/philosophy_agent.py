@@ -20,27 +20,25 @@ class PhilosophyAgent():
         )
         self.qdrant_client = QdrantClient(host="localhost", port=6333, timeout=60)
 
+        self.ollama_embedding = OllamaEmbedding(
+            model_name="nomic-embed-text",
+            base_url="http://localhost:11434",
+            ollama_additional_kwargs={"mirostat": 0},
+        )
+
     def run(self, user_query):
         try:
-            if self.mock_rag:
-                # Load and select a random paragraph from freewill_philosophy.txt
-                data_path = os.path.join(os.path.dirname(__file__), '../database/qdrant/data/freewill_philosophy.txt')
-                with open(data_path, 'r') as f:
-                    text = f.read()
-                paragraphs = [p.strip() for p in text.split('\n\n') if p.strip()]
-                database_context = random.choice(paragraphs) if paragraphs else '[MOCK RAG DATA]'
-            else:
-                print(f"PhilosophyAgent is searching the database with query: {user_query}")
-                hits = self.qdrant_client.search(
-                    collection_name="philosophy",
-                    query_vector=[random.random() for _ in range(50)],
-                    limit=1,
-                    timeout=60
-                )
-                if not hits:
-                    print("[ERROR] No hits found in the database.")
-                    return "No relevant data found in the database."
-                database_context = " | ".join([hit.payload.get("text", "") for hit in hits])
+            print(f"PhilosophyAgent is searching the database with query: {user_query}")
+            hits = self.qdrant_client.search(
+                collection_name="philosophy",
+                query_vector=self.ollama_embedding.get_query_embedding(user_query),
+                limit=1,
+                timeout=60
+            )
+            if not hits:
+                print("[ERROR] No hits found in the database.")
+                return "No relevant data found in the database."
+            database_context = " | ".join([hit.payload.get("text", "") for hit in hits])
 
             print(f"PhilosophyAgent is running with query: {user_query} + {database_context}")
             time.sleep(5)

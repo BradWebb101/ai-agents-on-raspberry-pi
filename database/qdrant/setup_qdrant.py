@@ -9,6 +9,13 @@ import random
 
 logging.basicConfig(level=logging.INFO)
 
+ollama_embedding = OllamaEmbedding(
+            model_name="nomic-embed-text",
+            base_url="http://localhost:11434",
+            ollama_additional_kwargs={"mirostat": 0},
+        )
+        
+
 def get_ollama_embedding(ollama_embedding, text):
     return ollama_embedding.get_query_embedding(text)
 
@@ -17,8 +24,6 @@ def setup_qdrant_with_data():
     qdrant_client = QdrantClient(host="localhost", port=6333)
     data_dir = os.path.join(os.path.dirname(__file__), 'data')
     file_to_collection = {
-        # "consciousness_philosophy.txt": "philosophy",
-        # "consciousness_science.txt": "science",
         "freewill_philosophy.txt": "philosophy",
         "freewill_science.txt": "science",
     }
@@ -34,7 +39,7 @@ def setup_qdrant_with_data():
                 # Create collection if it doesn't exist
                 qdrant_client.recreate_collection(
                     collection_name=collection,
-                    vectors_config=VectorParams(size=50, distance=Distance.COSINE)
+                    vectors_config=VectorParams(size=768, distance=Distance.COSINE)
                 )
             file_path = os.path.join(data_dir, filename)
             with open(file_path, "r") as f:
@@ -44,7 +49,7 @@ def setup_qdrant_with_data():
             points = []
             for i, chunk in enumerate(chunks):
                 point_id = str(uuid.uuid4())  # Convert UUID to string for valid PointStruct ID
-                points.append(PointStruct(id=point_id, vector=[random.random() for _ in range(50)], payload={"text": chunk}))
+                points.append(PointStruct(id=point_id, vector=get_ollama_embedding(ollama_embedding, chunk), payload={"text": chunk}))
             qdrant_client.upsert(collection_name=collection, points=points)
             logging.info(f"Inserted {len(points)} points into {collection}")
 
