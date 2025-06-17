@@ -26,7 +26,7 @@ class PhilosophyAgent():
             ollama_additional_kwargs={"mirostat": 0},
         )
 
-    def run(self, user_query):
+    def run(self, user_query, context={}):
         try:
             print(f"PhilosophyAgent is searching the database with query: {user_query}")
             hits = self.qdrant_client.search(
@@ -41,7 +41,7 @@ class PhilosophyAgent():
             database_context = " | ".join([hit.payload.get("text", "") for hit in hits])
 
             print(f"PhilosophyAgent is running with query: {user_query} + {database_context}")
-            response = self.agent.llm.complete(f"{user_query}. Context: {database_context}")
+            response = self.agent.llm.complete(f"{user_query}. Context: {database_context}, other agents responses: {context}")
             print('Response from PhilosophyAgent')
             print(response)
             return response

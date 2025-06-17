@@ -15,7 +15,7 @@ class SummaryAgent():
 
     def run(self, user_query, context={}):
         try:
-
+            print('Summary Agent is running')
             response = self.agent.llm.complete(f"{user_query}. Give a summary back no longer than 20 words")
             print('Summary Agent has a response')
             print(response)

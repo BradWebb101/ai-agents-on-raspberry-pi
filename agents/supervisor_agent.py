@@ -38,7 +38,7 @@ class SupervisorAgent:
             "debate_log": []
         }
 
-        max_turns = 4
+        max_turns = 10
         turn_count = 0
         # Initialize the next agent name to alternate between PhilosophyAgent and ScienceAgent
         next_agent_name = random.choice(["PhilosophyAgent", 'ScienceAgent'])
@@ -48,12 +48,15 @@ class SupervisorAgent:
             if not isinstance(state["current_question"], str):
                 state["current_question"] = str(state["current_question"])
 
-            agent_response = await asyncio.to_thread(next_agent.run, state["current_question"])
+            context = {}
+
+            agent_response = await asyncio.to_thread(next_agent.run, state["current_question"], context)
             state["debate_log"].append(f"{next_agent_name+'agent_response'+str(turn_count)}: {agent_response}")
-            
+            print('Summary Agent got asked to summarise')
             summary_agent_response = await asyncio.to_thread(self.summary_agent.run, agent_response)
             state["debate_log"].append(f"{next_agent_name+'agent_summary'+str(turn_count)}: {summary_agent_response}")
-
+            
+            context = summary_agent_response
             # Alternate the next agent name
             next_agent_name = "ScienceAgent" if next_agent_name == "PhilosophyAgent" else "PhilosophyAgent"
 

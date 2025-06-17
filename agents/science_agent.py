@@ -27,7 +27,7 @@ class ScienceAgent():
         )
         
 
-    def run(self, user_query):
+    def run(self, user_query, context={}):
         try:
             print(f"ScienceAgent is searching the database with query: {user_query}")
             hits = self.qdrant_client.search(
@@ -45,7 +45,7 @@ class ScienceAgent():
 
             # Combine user query, database context, and additional context
             print(f"ScienceAgent is running with query: {user_query} + {database_context}")
-            response = self.agent.llm.complete(f"{user_query}. Context: {database_context}")
+            response = self.agent.llm.complete(f"{user_query}. Context: {database_context}, other agents responses: {context}")
             print('Response from ScienceAgent')
             print(response)
             return response
