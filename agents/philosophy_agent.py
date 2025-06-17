@@ -42,7 +42,7 @@ class PhilosophyAgent():
                     return "No relevant data found in the database."
                 database_context = " | ".join([hit.payload.get("text", "") for hit in hits])
 
-            print(f"PhilosophyAgent is running with query: {user_query}")
+            print(f"PhilosophyAgent is running with query: {user_query} + {database_context}")
             response = self.agent.llm.complete(f"{user_query}. Context: {database_context}")
             return response
         except Exception as e:

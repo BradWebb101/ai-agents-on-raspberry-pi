@@ -53,8 +53,8 @@ class ScienceAgent():
                 database_context = " | ".join([hit.payload.get("text", "") for hit in hits])
 
             # Combine user query, database context, and additional context
-            print(f"ScienceAgent is running with query: {user_query}")
-            response = self.agent.llm.complete(f"{user_query}. Context: {database_context}. Additional Context: {context}")
+            print(f"ScienceAgent is running with query: {user_query} + {database_context}")
+            response = self.agent.llm.complete(f"{user_query}. Context: {database_context}")
             print(response)
             return response
         except Exception as e:
