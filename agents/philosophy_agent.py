@@ -3,44 +3,45 @@ from llama_index.llms.ollama import Ollama
 from llama_index.embeddings.ollama import OllamaEmbedding
 
 from qdrant_client import QdrantClient
-import os
 
 
 class PhilosophyAgent():
     def __init__(self):
         self.name = 'PhilosophyAgent'
         self.system_prompt = 'You are a helpful Philosophy agent'
-        self.use_qdrant = os.getenv('USE_QDRANT', '1').lower() not in ['0', 'false']
         self.agent = FunctionAgent(
             name=self.name,
             description='Handles philosophical queries and debates, providing thoughtful and reflective responses.',
             llm=Ollama(model="tinyllama"),
             system_prompt=self.system_prompt
         )
-        if self.use_qdrant:
-            self.qdrant_client = QdrantClient(host="localhost", port=6333)
-            self.ollama_embedding = OllamaEmbedding(
-                model_name="tinyllama",
-                base_url="http://localhost:11434",
-                ollama_additional_kwargs={"mirostat": 0},
-            )
+        self.qdrant_client = QdrantClient(host="localhost", port=6333)
+
+        # Initialize Ollama Embedding
+        self.ollama_embedding = OllamaEmbedding(
+            model_name="tinyllama",
+            base_url="http://localhost:11434",
+            ollama_additional_kwargs={"mirostat": 0},
+        )
 
     def run(self, user_query, context={}):
         try:
-            if self.use_qdrant:
-                query_vector = self.ollama_embedding.get_query_embedding(user_query)
-                hits = self.qdrant_client.search(
-                    collection_name="philosophy",
-                    query_vector=query_vector,
-                    limit=2
-                )
-                if not hits:
-                    print("[ERROR] No hits found in the database.")
-                    return "No relevant data found in the database."
-                database_context = " | ".join([hit.payload.get("text", "") for hit in hits])
-                response = self.agent.llm.complete(f"{user_query}. Context: {database_context}. Additional Context: {context}")
-            else:
-                response = self.agent.llm.complete(f"{user_query}. Additional Context: {context}")
+            # Query the database for additional context
+            query_vector = self.ollama_embedding.get_query_embedding(user_query)
+
+            hits = self.qdrant_client.search(
+                collection_name="philosophy",
+                query_vector=query_vector,
+                limit=2
+            )
+            if not hits:
+                print("[ERROR] No hits found in the database.")
+                return "No relevant data found in the database."
+
+            database_context = " | ".join([hit.payload.get("text", "") for hit in hits])
+
+            # Combine user query, database context, and additional context
+            response = self.agent.llm.complete(f"{user_query}. Context: {database_context}. Additional Context: {context}")
             print(response)
             return response
         except Exception as e:

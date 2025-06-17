@@ -1,5 +1,46 @@
 # Engineering Day: Multi-Agent Debate System
 
+## How to Run
+
+1. **Create a Python 3.12 virtual environment:**
+
+   ```sh
+   python3.12 -m venv .venv
+   source .venv/bin/activate
+   pip install --upgrade pip
+   cd agents
+   pip install -r requirements.txt
+   ```
+
+2. **Set your OpenAI API key (required for MCP server):**
+
+   You must have an OpenAI API key to use the MCP server. Add it to your environment or a `.env` file:
+
+   ```sh
+   echo "OPENAI_API_KEY=************" >> .env
+   ```
+
+3. **Run the setup script:**
+
+   ```sh
+   bash setup.sh
+   ```
+
+   This will:
+   - Start TinyLlama with Ollama
+   - Populate Qdrant with embeddings
+   - Set up the SQLite database (if setup_sql.py exists)
+
+4. **Start all services with Docker Compose:**
+
+   ```sh
+   docker compose up --build
+   ```
+
+   This will build and start all containers as defined in `docker-compose.yml`.
+
+---
+
 ## Overview
 
 This project is a modular, multi-agent debate and evaluation system that leverages LLMs (primarily TinyLlama via Ollama) and a Qdrant vector database. It features agents for philosophy, science, and summarization, orchestrated by a supervisor agent, and supports SQL-based queries via an MCP server. The system is containerized for easy deployment.
@@ -53,6 +94,7 @@ This project is a modular, multi-agent debate and evaluation system that leverag
 - **API**: FastAPI app in `mcp_server/mcp_server.py`, exposes endpoints for agent tools.
 - **Requirements**: See `mcp_server/requirements.txt`.
 - **Dockerfile**: Provided for containerized deployment.
+- **Requires**: An OpenAI API key set as `OPENAI_API_KEY` in your environment or `.env` file.
 
 ---
 
@@ -75,6 +117,7 @@ This project is a modular, multi-agent debate and evaluation system that leverag
 - **Docker** and **Docker Compose** installed
 - **Ollama** installed and running locally
 - **TinyLlama** model pulled for Ollama
+- **OpenAI API Key** (required for MCP server)
 
   ```sh
   ollama run tinyllama:1.1b
@@ -135,7 +178,7 @@ This project is a modular, multi-agent debate and evaluation system that leverag
 
 - **Model**: All agents use TinyLlama via Ollama (`ollama run tinyllama:1.1b` must be running).
 - **Qdrant**: Data is persisted in `database/qdrant/data/`.
-- **Environment Variables**: Some scripts use `.env` for configuration.
+- **Environment Variables**: Some scripts use `.env` for configuration. **You must set `OPENAI_API_KEY` to use the MCP server.**
 - **Extensibility**: Add new agents or data by following the patterns in the `agents/` and `database/qdrant/` directories.
 
 ---
