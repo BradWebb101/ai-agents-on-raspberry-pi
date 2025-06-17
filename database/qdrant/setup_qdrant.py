@@ -14,7 +14,7 @@ def get_ollama_embedding(ollama_embedding, text):
 def setup_qdrant_with_data():
     load_dotenv()
     ollama_embedding = OllamaEmbedding(
-        model_name="tinyllama",
+        model_name="nomic-embed-text",
         base_url="http://localhost:11434",
         ollama_additional_kwargs={"mirostat": 0},
     )
@@ -38,7 +38,7 @@ def setup_qdrant_with_data():
                 # Create collection if it doesn't exist
                 qdrant_client.recreate_collection(
                     collection_name=collection,
-                    vectors_config=VectorParams(size=2048, distance=Distance.COSINE)
+                    vectors_config=VectorParams(size=768, distance=Distance.COSINE)
                 )
             file_path = os.path.join(data_dir, filename)
             with open(file_path, "r") as f:

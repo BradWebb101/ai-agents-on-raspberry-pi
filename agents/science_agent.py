@@ -17,7 +17,7 @@ class ScienceAgent():
 
         # Initialize Ollama Embedding
         self.ollama_embedding = OllamaEmbedding(
-            model_name="tinyllama",
+            model_name="nomic-embed-text:v1.5",
             base_url="http://localhost:11434",
             ollama_additional_kwargs={"mirostat": 0},
         )
