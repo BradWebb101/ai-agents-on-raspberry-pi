@@ -56,7 +56,6 @@ class SupervisorAgent:
         next_agent_name = random.choice(["PhilosophyAgent", 'ScienceAgent'])
         while turn_count < max_turns:
             next_agent = self.philosophy_agent if next_agent_name == "PhilosophyAgent" else self.science_agent
-            print((f'{next_agent.name} has been proposed the question {state['current_question']}'))
             if not isinstance(state["current_question"], str):
                 state["current_question"] = str(state["current_question"])
 
