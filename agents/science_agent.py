@@ -1,54 +1,49 @@
-from agents.base_agent import BaseAgent
-from agents.events import Event, Context, QuestionEvent, AgentResponseEvent, LogEvent
-import asyncio
-from typing import Dict, Any
+from llama_index.core.agent.workflow import FunctionAgent
+from llama_index.llms.ollama import Ollama
+from llama_index.embeddings.ollama import OllamaEmbedding
 from qdrant_client import QdrantClient
-import logging
-import os
-from openai import OpenAI
-from dotenv import load_dotenv
 
-class ScienceAgent(BaseAgent):
+class ScienceAgent():
     def __init__(self):
-        super().__init__(name="ScienceAgent")
-        self.logger = logging.getLogger("ScienceAgent")
-        self.system_prompt = (
-            "You are a precise and logical science expert. "
-            "You answer questions with scientific facts, evidence, and clear explanations. "
-            "You enjoy debating scientific theories, discoveries, and the scientific method."
+        self.name = 'ScienceAgent'
+        self.system_prompt = 'You are a helpful science agent'
+        self.agent = FunctionAgent(
+            name=self.name,
+            description='Handles scientific queries and debates, providing empirical and evidence-based responses.',
+            llm=Ollama(model="tinyllama"),
+            system_prompt=self.system_prompt
         )
-        self.collection_name = "melvis_science"
-        self.client = QdrantClient(host="localhost", port=6333)
-        load_dotenv()
-        self.openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        self.qdrant_client = QdrantClient(host="localhost", port=6333)
 
-    async def handle_event(self, event: Event, context: Context):
-        if isinstance(event, QuestionEvent):
-            context.add_event(LogEvent(sender=self.name, msg=f"Received question: {event.question}"))
-            # Simulate thinking
-            await asyncio.sleep(0.5)
-            response = f"From a scientific perspective: {event.question} (analyzed empirically)"
-            response_event = AgentResponseEvent(sender=self.name, response=response, agent_name=self.name)
-            context.add_event(response_event)
-            return response_event
-        return None
+        # Initialize Ollama Embedding
+        self.ollama_embedding = OllamaEmbedding(
+            model_name="tinyllama",
+            base_url="http://localhost:11434",
+            ollama_additional_kwargs={"mirostat": 0},
+        )
+        
 
-    async def process_task(self, task: Dict[str, Any]) -> Dict[str, Any]:
-        question = task.get("data", "")
-        self.logger.info(f"Received question: {question}")
-        response = self.openai_client.embeddings.create(
-            input=question,
-            model="text-embedding-ada-002"
-        )
-        query_vector = response.data[0].embedding
-        hits = self.client.search(
-            collection_name=self.collection_name,
-            query_vector=query_vector,
-            limit=3
-        )
-        if hits:
-            answer = hits[0].payload.get("text", "No answer found.")
-            self.logger.info(f"Answering: {answer}")
-            return {"result": answer}
-        self.logger.info("No answer found in the science vector database.")
-        return {"result": "No answer found in the science vector database."} 
+    def run(self, user_query, context={}):
+        try:
+            # Query the database for additional context
+            query_vector = self.ollama_embedding.get_query_embedding(user_query)
+
+            hits = self.qdrant_client.search(
+                collection_name="science",
+                query_vector=query_vector,
+                limit=5
+            )
+
+            if not hits:
+                print("[ERROR] No hits found in the database.")
+                return "No relevant data found in the database."
+
+            database_context = " | ".join([hit.payload.get("text", "") for hit in hits])
+
+            # Combine user query, database context, and additional context
+            response = self.agent.llm.complete(f"{user_query}. Context: {database_context}. Additional Context: {context}")
+            print(response)
+            return response
+        except Exception as e:
+            print(f"[ERROR] ScienceAgent encountered an error: {e}")
+            return "Error occurred while processing the query."

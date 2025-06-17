@@ -1,174 +1,88 @@
-from base_agent import BaseAgent
-from typing import Dict, Any, List
-import asyncio
-import logging
-import os
-from openai import OpenAI
+from llama_index.core.agent.workflow import AgentWorkflow, FunctionAgent
+from llama_index.embeddings.ollama import OllamaEmbedding
 from qdrant_client import QdrantClient
 from dotenv import load_dotenv
-import random
-from agents.philosophy_agent import PhilosophyAgentExecutor
-from agents.science_agent import ScienceAgentExecutor
-from agents.agent_executor import RequestContext, EventQueue
-from agents.events import AgentResponseEvent
-
-# Import your agents
+from llama_index.llms.ollama import Ollama
 from philosophy_agent import PhilosophyAgent
 from science_agent import ScienceAgent
-from agents.events import (
-    Context, LogEvent, QuestionEvent, AgentResponseEvent, DebateStartEvent, DebateEndEvent
-)
+from summary_agent import SummaryAgent
+import asyncio
+import uuid
+import random
 
-class AgentSupervisor:
+class SupervisorAgent:
     def __init__(self):
-        self.system_prompt = (
-            "You are a neutral and fair debate moderator. "
-            "You introduce topics, keep the discussion on track, and summarize the key points made by each participant. "
-            "You ensure that the debate remains respectful and productive, and you do not take sides."
-        )
-        self.agents = [PhilosophyAgent(), ScienceAgent()]
-        self.logger = logging.getLogger("AgentSupervisor")
         load_dotenv()
-        self.openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
         self.qdrant_client = QdrantClient(host="localhost", port=6333)
-        self.philosophy_collection = "melvis_philosophy"
-        self.science_collection = "melvis_science"
-        self.context = Context()
-        self.philosophy_executor = PhilosophyAgentExecutor()
-        self.science_executor = ScienceAgentExecutor()
 
-    async def delegate_task(self, task: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Delegate a task to the appropriate agent based on the task type.
-        """
-        task_type = task.get("type", "unknown")
-        agent = self.agents.get(task_type)
+        self.philosophy_agent = PhilosophyAgent() 
+        self.science_agent = ScienceAgent() 
+        self.summary_agent = SummaryAgent()
 
-        if not agent:
-            self.logger.error(f"No agent found for task type: {task_type}")
-            return {"error": f"No agent found for task type: {task_type}"}
-
-        try:
-            result = await agent.process_task(task)
-            return result
-        except Exception as e:
-            self.logger.error(f"Error processing task: {e}")
-            return {"error": str(e)}
-
-    async def coordinate_tasks(self, tasks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """
-        Coordinate multiple tasks, ensuring they are executed in the correct order.
-        """
-        results = []
-        for task in tasks:
-            result = await self.delegate_task(task)
-            results.append(result)
-        return results
-
-    async def handle_error(self, error: Exception, task: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Handle errors that occur during task execution.
-        """
-        self.logger.error(f"Error handling task: {error}")
-        return {"error": str(error), "task": task}
-
-    async def run(self):
-        """
-        Main loop for the supervisor agent.
-        """
-        while True:
-            # Example: Fetch tasks from a queue or API
-            tasks = await self.fetch_tasks()
-            results = await self.coordinate_tasks(tasks)
-            await self.process_results(results)
-            await asyncio.sleep(1)  # Prevent busy-waiting
-
-    async def process_results(self, results: List[Dict[str, Any]]):
-        """
-        Process the results of the tasks.
-        """
-        for result in results:
-            if "error" in result:
-                await self.handle_error(Exception(result["error"]), result.get("task", {}))
-            else:
-                self.logger.info(f"Task completed successfully: {result}")
-
-    def get_openai_embedding(self, text):
-        response = self.openai_client.embeddings.create(
-            input=text,
-            model="text-embedding-ada-002"
-        )
-        return response.data[0].embedding
-
-    def query_collection(self, collection_name, question, limit=2):
-        query_vector = self.get_openai_embedding(question)
-        hits = self.qdrant_client.search(
-            collection_name=collection_name,
-            query_vector=query_vector,
-            limit=limit
-        )
-        return [hit.payload.get("text", "") for hit in hits]
-
-    async def run_debate(self, question: str):
-        # Start debate event
-        start_event = DebateStartEvent(sender="Supervisor", topic=question)
-        self.context.add_event(start_event)
-        self.context.add_event(LogEvent(sender="Supervisor", msg=f"Debate started on: {question}"))
-
-        # Send question to all agents and gather responses
-        question_event = QuestionEvent(sender="Supervisor", question=question)
-        responses = []
-        for agent in self.agents:
-            response_event = await agent.handle_event(question_event, self.context)
-            if response_event:
-                responses.append(response_event)
-                self.context.add_event(LogEvent(sender="Supervisor", msg=f"Received response from {agent.name}"))
-
-        # End debate event
-        summary = " | ".join([r.response for r in responses])
-        end_event = DebateEndEvent(sender="Supervisor", summary=summary)
-        self.context.add_event(end_event)
-        self.context.add_event(LogEvent(sender="Supervisor", msg="Debate ended."))
-
-        # Print debate log
-        self.print_debate_log()
-
-    def print_debate_log(self):
-        print("\n--- Debate Log ---")
-        for event in self.context.history:
-            if isinstance(event, LogEvent):
-                print(f"[{event.timestamp}] {event.sender}: {event.msg}")
-            elif isinstance(event, AgentResponseEvent):
-                print(f"[{event.timestamp}] {event.agent_name} response: {event.response}")
-        print("--- End of Debate ---\n")
-
-    async def run_debate_a2a(self, question: str):
-        print("\n--- A2A Protocol Debate ---")
-        # Create context and event queues for each agent
-        context = RequestContext(user_id="user", metadata={"question": question})
-        philosophy_queue = EventQueue()
-        science_queue = EventQueue()
-
-        # Run both agents concurrently
-        await asyncio.gather(
-            self.philosophy_executor.execute(context, philosophy_queue),
-            self.science_executor.execute(context, science_queue),
+        self.supervisor_agent = FunctionAgent(
+            name="SupervisorAgent",
+            llm=Ollama(model="tinyllama"),
+            description="Moderates debates and summarizes outcomes.",
+            system_prompt="You are a neutral debate moderator.",
+            can_handoff_to=["PhilosophyAgent", "ScienceAgent"]
         )
 
-        # Collect responses
-        responses = []
-        while not philosophy_queue.empty():
-            event = await philosophy_queue.dequeue_event()
-            if isinstance(event, AgentResponseEvent):
-                print(f"PhilosophyAgent: {event.response}")
-                responses.append(event)
-        while not science_queue.empty():
-            event = await science_queue.dequeue_event()
-            if isinstance(event, AgentResponseEvent):
-                print(f"ScienceAgent: {event.response}")
-                responses.append(event)
-        print("--- End of A2A Debate ---\n")
+        # Setup workflow
+        self.workflow = AgentWorkflow(
+            agents=[self.philosophy_agent.agent, self.science_agent.agent, self.supervisor_agent],
+            root_agent=self.supervisor_agent.name,
+            initial_state={
+                "research_notes": {},
+                "debate_summary": "No summary yet."
+            }
+        )
 
-if __name__ == "__main__":
-    supervisor = AgentSupervisor()
-    asyncio.run(supervisor.run()) 
+    async def orchestrate_debate(self, question: str):
+        """
+        Orchestrate a debate between agents using AgentWorkflow.
+        """
+        print("Starting debate...")
+
+        state = {
+            "current_question": question,
+            "debate_log": []
+        }
+
+        max_turns = 6
+        turn_count = 0
+
+        while turn_count < max_turns:
+            print(f"Turn {turn_count + 1}: SupervisorAgent moderates")
+
+            next_agent_name = random.choice([self.philosophy_agent.name, self.science_agent.name])
+            print(f"SupervisorAgent hands off to: {next_agent_name}")
+
+            next_agent = self.philosophy_agent if next_agent_name == "PhilosophyAgent" else self.science_agent
+
+            if not isinstance(state["current_question"], str):
+                state["current_question"] = str(state["current_question"])
+
+            agent_context = state.get("agent_context", {})
+            agent_response = await asyncio.to_thread(next_agent.run, state["current_question"], agent_context)
+
+            summary_agent_response = await asyncio.to_thread(self.summary_agent.run, agent_response)
+
+            state["debate_log"].append(f"{next_agent_name}: {agent_response}")
+            state["current_question"] = summary_agent_response
+            state["agent_context"] = agent_context
+
+            turn_count += 1
+            print('='*20)
+
+        # Generate a UUID for the filename
+        file_uuid = str(uuid.uuid4())
+        file_path = f"../debate_logs/{file_uuid}.txt"
+
+        # Write the debate log to the file
+        with open(file_path, "w") as log_file:
+            log_file.write("\n--- Debate Summary ---\n")
+            for log in state["debate_log"]:
+                log_file.write(log + "\n")
+            log_file.write("--- End of Debate ---\n")
+
+        print(f"Debate log saved to {file_path}")

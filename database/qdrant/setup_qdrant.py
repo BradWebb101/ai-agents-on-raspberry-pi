@@ -1,56 +1,57 @@
 import os
-from openai import OpenAI
 from qdrant_client import QdrantClient
 from qdrant_client.http.models import PointStruct, VectorParams, Distance
 from dotenv import load_dotenv
 import logging
+from llama_index.embeddings.ollama import OllamaEmbedding
+import uuid
 
 logging.basicConfig(level=logging.INFO)
 
-def get_openai_embedding(client, text):
-    response = client.embeddings.create(input=text, model="text-embedding-ada-002")
-    return response.data[0].embedding
+def get_ollama_embedding(ollama_embedding, text):
+    return ollama_embedding.get_query_embedding(text)
 
 def setup_qdrant_with_data():
     load_dotenv()
-    openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    ollama_embedding = OllamaEmbedding(
+        model_name="tinyllama",
+        base_url="http://localhost:11434",
+        ollama_additional_kwargs={"mirostat": 0},
+    )
     qdrant_client = QdrantClient(host="localhost", port=6333)
-    data_dir = os.path.join(os.path.dirname(__file__), '../database/qdrant/data')
+    data_dir = os.path.join(os.path.dirname(__file__), 'data')
     file_to_collection = {
-        "consciousness_philosophy.txt": "melvis_philosophy",
-        "consciousness_science.txt": "melvis_science",
-        "freewill_philosophy.txt": "melvis_philosophy",
-        "freewill_science.txt": "melvis_science",
+        "consciousness_philosophy.txt": "philosophy",
+        "consciousness_science.txt": "science",
+        "freewill_philosophy.txt": "philosophy",
+        "freewill_science.txt": "science",
     }
     for filename in os.listdir(data_dir):
         if filename.endswith(".txt"):
             collection = file_to_collection.get(filename)
             if not collection:
                 continue
-            # Check if collection has data
+            # Check if collection exists
             try:
-                count = qdrant_client.count(collection_name=collection).count
-                if count > 0:
-                    logging.info(f"Collection {collection} already has data, skipping.")
-                    continue
+                qdrant_client.get_collection(collection_name=collection)
             except Exception:
-                pass  # Collection may not exist yet
+                # Create collection if it doesn't exist
+                qdrant_client.recreate_collection(
+                    collection_name=collection,
+                    vectors_config=VectorParams(size=2048, distance=Distance.COSINE)
+                )
             file_path = os.path.join(data_dir, filename)
             with open(file_path, "r") as f:
                 text = f.read()
             # Split into paragraphs
             chunks = [chunk.strip() for chunk in text.split('\n\n') if chunk.strip()]
-            # Create collection
-            qdrant_client.recreate_collection(
-                collection_name=collection,
-                vectors_config=VectorParams(size=1536, distance=Distance.COSINE)
-            )
             points = []
             for i, chunk in enumerate(chunks):
-                embedding = get_openai_embedding(openai_client, chunk)
-                points.append(PointStruct(id=i, vector=embedding, payload={"text": chunk}))
+                embedding = get_ollama_embedding(ollama_embedding, chunk)
+                point_id = str(uuid.uuid4())  # Convert UUID to string for valid PointStruct ID
+                points.append(PointStruct(id=point_id, vector=embedding, payload={"text": chunk}))
             qdrant_client.upsert(collection_name=collection, points=points)
             logging.info(f"Inserted {len(points)} points into {collection}")
 
 if __name__ == "__main__":
-    setup_qdrant_with_data() 
+    setup_qdrant_with_data()

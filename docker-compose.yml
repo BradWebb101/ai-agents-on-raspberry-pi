@@ -1,20 +1,20 @@
 services:
-  sqlite-api:
-    build:
-      context: ./database/sqlite
-    container_name: sqlite-api
-    volumes:
-      - ./database/sqlite/database.db:/app/database.db
-    ports:
-      - "8000:8000"
-  mcp-server:
-    build:
-      context: ./mcp_server
-    container_name: mcp-server
-    ports:
-      - "9000:9000"
-    depends_on:
-      - sqlite-api
+  # sqlite-api:
+  #   build:
+  #     context: ./database/sqlite
+  #   container_name: sqlite-api
+  #   volumes:
+  #     - ./database/sqlite/database.db:/app/database.db
+  #   ports:
+  #     - "8000:8000"
+  # mcp-server:
+  #   build:
+  #     context: ./mcp_server
+  #   container_name: mcp-server
+  #   ports:
+  #     - "9000:9000"
+  #   depends_on:
+  #     - sqlite-api
   qdrant:
     image: qdrant/qdrant:latest
     container_name: qdrant
