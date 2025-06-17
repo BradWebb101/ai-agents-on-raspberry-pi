@@ -1,10 +1,12 @@
 from llama_index.core.agent.workflow import FunctionAgent
 from llama_index.llms.ollama import Ollama
+import os
 
 class SummaryAgent():
     def __init__(self):
         self.name = 'SummaryAgent'
         self.system_prompt = 'You are a 5 word summary agent, summarize to 5 words only'
+        self.use_qdrant = os.getenv('USE_QDRANT', '1').lower() not in ['0', 'false']  # For consistency, not used
         self.agent = FunctionAgent(
             name=self.name,
             description='You are a summary agent, you send back short and consise summaries',

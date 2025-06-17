@@ -9,12 +9,14 @@ from summary_agent import SummaryAgent
 import asyncio
 import uuid
 import random
+import os
 
 class SupervisorAgent:
     def __init__(self):
         load_dotenv()
-        self.qdrant_client = QdrantClient(host="localhost", port=6333)
-
+        self.use_qdrant = os.getenv('USE_QDRANT', '1').lower() not in ['0', 'false']
+        if self.use_qdrant:
+            self.qdrant_client = QdrantClient(host="localhost", port=6333)
         self.philosophy_agent = PhilosophyAgent() 
         self.science_agent = ScienceAgent() 
         self.summary_agent = SummaryAgent()
