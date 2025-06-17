@@ -1,4 +1,8 @@
-Science investigates free will through neuroscience, genetics, and psychology. Studies suggest that brain activity precedes conscious decisions, challenging traditional notions of free will. Determinism posits that all actions are caused by prior events. 
+Science investigates free will through neuroscience, genetics, and psychology. 
+
+Studies suggest that brain activity precedes conscious decisions, challenging traditional notions of free will. 
+
+Determinism posits that all actions are caused by prior events. 
 
 Scientific research explores how biological, environmental, and genetic factors influence human behavior, questioning the extent of autonomous choice. 
 
@@ -8,9 +12,13 @@ Researchers seek to understand whether human beings possess genuine autonomy in 
 
 This inquiry has profound implications for our understanding of responsibility, agency, and the nature of human behavior.
 
-Neuroscientific research has played a central role in the contemporary debate over free will. Experiments using techniques such as electroencephalography (EEG) and functional magnetic resonance imaging (fMRI) have revealed that brain activity associated with decision-making can be detected before individuals become consciously aware of their choices. 
+Neuroscientific research has played a central role in the contemporary debate over free will. 
 
-The famous experiments by Benjamin Libet in the 1980s showed that the readiness potential—a measure of brain activity—precedes the conscious intention to act by several hundred milliseconds. These findings have been interpreted by some as evidence that conscious will is an illusion, and that our actions are initiated unconsciously before we become aware of them.
+Experiments using techniques such as electroencephalography (EEG) and functional magnetic resonance imaging (fMRI) have revealed that brain activity associated with decision-making can be detected before individuals become consciously aware of their choices. 
+
+The famous experiments by Benjamin Libet in the 1980s showed that the readiness potential—a measure of brain activity—precedes the conscious intention to act by several hundred milliseconds. 
+
+These findings have been interpreted by some as evidence that conscious will is an illusion, and that our actions are initiated unconsciously before we become aware of them.
 
 However, the interpretation of these results remains controversial. Some scientists argue that the readiness potential reflects only a general preparation to act, rather than a specific decision. 
 

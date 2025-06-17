@@ -19,7 +19,7 @@ def check_qdrant_collections():
                 # Try to fetch a sample point
                 results = client.search(
                     collection_name=name,
-                    query_vector=[0.0]*2,  # Dummy vector, just to get some results
+                    query_vector=[0.0]*50,  # Dummy vector, just to get some results
                     limit=1,
                     with_payload=True,
                     with_vectors=True

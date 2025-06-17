@@ -34,7 +34,7 @@ def setup_qdrant_with_data():
                 # Create collection if it doesn't exist
                 qdrant_client.recreate_collection(
                     collection_name=collection,
-                    vectors_config=VectorParams(size=2, distance=Distance.COSINE)
+                    vectors_config=VectorParams(size=50, distance=Distance.COSINE)
                 )
             file_path = os.path.join(data_dir, filename)
             with open(file_path, "r") as f:
@@ -44,7 +44,7 @@ def setup_qdrant_with_data():
             points = []
             for i, chunk in enumerate(chunks):
                 point_id = str(uuid.uuid4())  # Convert UUID to string for valid PointStruct ID
-                points.append(PointStruct(id=point_id, vector=[random.random() for _ in range(2)], payload={"text": chunk}))
+                points.append(PointStruct(id=point_id, vector=[random.random() for _ in range(50)], payload={"text": chunk}))
             qdrant_client.upsert(collection_name=collection, points=points)
             logging.info(f"Inserted {len(points)} points into {collection}")
 
