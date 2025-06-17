@@ -15,7 +15,7 @@ class PhilosophyAgent():
             llm=Ollama(model="tinyllama"),
             system_prompt=self.system_prompt
         )
-        self.qdrant_client = QdrantClient(host="localhost", port=6333, timeout=30)
+        self.qdrant_client = QdrantClient(host="localhost", port=6333, timeout=60)
 
         # Initialize Ollama Embedding
         self.ollama_embedding = OllamaEmbedding(
@@ -34,8 +34,8 @@ class PhilosophyAgent():
             hits = self.qdrant_client.search(
                 collection_name="philosophy",
                 query_vector=query_vector,
-                limit=2,
-                timeout=30
+                limit=1,
+                timeout=60
             )
             if not hits:
                 print("[ERROR] No hits found in the database.")
