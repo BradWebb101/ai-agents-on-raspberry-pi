@@ -9,7 +9,7 @@ class SummaryAgent():
         self.agent = FunctionAgent(
             name=self.name,
             description='You are a summary agent, you send back short and consise summaries',
-            llm=Ollama(model="tinyllama"),
+            llm=Ollama(model="tinyllama", request_timeout=120.0),
             system_prompt=self.system_prompt
         )
 

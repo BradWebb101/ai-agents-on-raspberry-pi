@@ -15,7 +15,7 @@ class PhilosophyAgent():
         self.agent = FunctionAgent(
             name=self.name,
             description='Handles philosophical queries and debates, providing thoughtful and reflective responses.',
-            llm=Ollama(model="tinyllama"),
+            llm=Ollama(model="tinyllama", request_timeout=120.0),
             system_prompt=self.system_prompt
         )
         self.qdrant_client = QdrantClient(host="localhost", port=6333, timeout=60)
@@ -41,8 +41,6 @@ class PhilosophyAgent():
             database_context = " | ".join([hit.payload.get("text", "") for hit in hits])
 
             print(f"PhilosophyAgent is running with query: {user_query} + {database_context}")
-            time.sleep(5)
-            print('Sleeping for 5 seconds to cool the cpu')
             response = self.agent.llm.complete(f"{user_query}. Context: {database_context}")
             return response
         except Exception as e:

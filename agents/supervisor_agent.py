@@ -21,7 +21,7 @@ class SupervisorAgent:
 
         self.supervisor_agent = FunctionAgent(
             name="SupervisorAgent",
-            llm=Ollama(model="tinyllama"),
+            llm=Ollama(model="tinyllama", request_timeout=120.0),
             description="Moderates debates and summarizes outcomes.",
             system_prompt="You are a neutral debate moderator.",
             can_handoff_to=["PhilosophyAgent", "ScienceAgent"]
