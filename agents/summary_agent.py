@@ -1,5 +1,6 @@
 from llama_index.core.agent.workflow import FunctionAgent
 from llama_index.llms.ollama import Ollama
+import time
 
 class SummaryAgent():
     def __init__(self):
@@ -15,7 +16,8 @@ class SummaryAgent():
     def run(self, user_query, context={}):
         try:
             print(self.agent.system_prompt)
-            # Combine user query, database context, and additional context
+            time.sleep(5)
+            print('Sleeping for 5 seconds to cool the cpu')
             response = self.agent.llm.complete(f"{user_query}. ")
             print('Summary')
             print('='*20)

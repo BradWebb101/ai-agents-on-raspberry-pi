@@ -5,7 +5,7 @@ from llama_index.embeddings.ollama import OllamaEmbedding
 from qdrant_client import QdrantClient
 import random
 import os
-
+import time
 
 class PhilosophyAgent():
     def __init__(self, mock_rag=False):
@@ -43,6 +43,8 @@ class PhilosophyAgent():
                 database_context = " | ".join([hit.payload.get("text", "") for hit in hits])
 
             print(f"PhilosophyAgent is running with query: {user_query} + {database_context}")
+            time.sleep(5)
+            print('Sleeping for 5 seconds to cool the cpu')
             response = self.agent.llm.complete(f"{user_query}. Context: {database_context}")
             return response
         except Exception as e:

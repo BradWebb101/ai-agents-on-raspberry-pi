@@ -4,7 +4,7 @@ from llama_index.embeddings.ollama import OllamaEmbedding
 from qdrant_client import QdrantClient
 import random
 import os
-
+import time
 
 class ScienceAgent():
     def __init__(self, mock_rag=False):
@@ -54,6 +54,8 @@ class ScienceAgent():
 
             # Combine user query, database context, and additional context
             print(f"ScienceAgent is running with query: {user_query} + {database_context}")
+            time.sleep(5)
+            print('Sleeping for 5 seconds to cool the cpu')
             response = self.agent.llm.complete(f"{user_query}. Context: {database_context}")
             print(response)
             return response
