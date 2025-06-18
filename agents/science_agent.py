@@ -9,7 +9,7 @@ import time
 class ScienceAgent():
     def __init__(self, mock_rag=False):
         self.name = 'ScienceAgent'
-        self.system_prompt = 'You are a helpful science agent'
+        self.system_prompt = 'You are a helpful science agent, you analyze the user query and provide a thoughtful and reflective response.'
         self.mock_rag = mock_rag
         self.agent = FunctionAgent(
             name=self.name,

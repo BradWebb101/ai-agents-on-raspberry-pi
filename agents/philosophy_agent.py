@@ -10,7 +10,7 @@ import time
 class PhilosophyAgent():
     def __init__(self, mock_rag=False):
         self.name = 'PhilosophyAgent'
-        self.system_prompt = 'You are a helpful Philosophy agent'
+        self.system_prompt = 'You are a helpful Philosophy agent, you analyze the user query and provide a thoughtful and reflective response.'
         self.mock_rag = mock_rag
         self.agent = FunctionAgent(
             name=self.name,
