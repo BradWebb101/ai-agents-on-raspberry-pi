@@ -44,7 +44,7 @@ class ScienceAgent():
             database_context = " | ".join([hit.payload.get("text", "") for hit in hits])
 
             # Combine user query, database context, and additional context
-            print(f"ScienceAgent is running with query: {user_query} + {database_context}")
+            print(f"ScienceAgent is running with query: {user_query} + Rag: {database_context} + Context: {context}")
             response = self.agent.llm.complete(f"{user_query}. Context: {database_context}, other agents responses: {context}")
             print('Response from ScienceAgent')
             print(response)
