@@ -2,13 +2,24 @@
 
 ## How to Run
 
+
+## Running the System
+
+### Prerequisites
+
+- **Docker** and **Docker Compose** installed
+- **Ollama** installed and running locally
+- **TinyLlama** model pulled for ollama tinyllama
+- **Normic Embedding** model pulled from ollama nomic-embed-text 
+- **OpenAI API Key** (required for MCP server)
+
+
 1. **Create a Python 3.12 virtual environment:**
 
    ```sh
    python3.12 -m venv .venv
    source .venv/bin/activate
    pip install --upgrade pip
-   cd agents
    pip install -r requirements.txt
    ```
 
@@ -20,7 +31,16 @@
    echo "OPENAI_API_KEY=************" >> .env
    ```
 
-3. **Run the setup script:**
+3. **Start all services with Docker Compose:**
+
+   ```sh
+   docker compose up --build
+   ```
+
+   This will build and start all containers as defined in `docker-compose.yml`.
+
+
+4. **Run the setup script: Only needs to be done once**
 
    ```sh
    bash setup.sh
@@ -31,13 +51,11 @@
    - Populate Qdrant with embeddings
    - Set up the SQLite database (if setup_sql.py exists)
 
-4. **Start all services with Docker Compose:**
+5. **Run app**
 
-   ```sh
-   docker compose up --build
-   ```
-
-   This will build and start all containers as defined in `docker-compose.yml`.
+```sh
+python agents/main.py
+```
 
 ---
 
@@ -100,55 +118,6 @@ This project is a modular, multi-agent debate and evaluation system that leverag
 ## Utilities
 
 - **utils/main.py**: Generates and populates the SQLite database with dummy e-commerce data.
-
----
-
-## Running the System
-
-### 1. Prerequisites
-
-- **Docker** and **Docker Compose** installed
-- **Ollama** installed and running locally
-- **TinyLlama** model pulled for ollama tinyllama
-- **Normic Embedding** model pulled from ollama nomic-embed-text 
-- **OpenAI API Key** (required for MCP server)
-
-  ```sh
-  ollama run tinyllama
-  ollama run nomic-embed-text
-  ```
-
-  This will download and start the TinyLlama model, which is required for all agent LLM operations.
-
-### 2. Start Services
-
-- To start Qdrant (and optionally other services), use:
-
-  ```sh
-  docker-compose up -d
-  ```
-
-### 3. Populate Qdrant
-
-- Run the setup script to embed and load data into Qdrant:
-
-  ```sh
-  python database/qdrant/setup_qdrant.py
-  ```
-
-### 4. Run Agents
-
-- **Main Debate Orchestrator**:
-
-  ```sh
-  python agents/main.py
-  ```
-
-- **SQL MCP Agent**:
-
-  ```sh
-  python sql_mcp_agent/main.py
-  ```
 
 ## Main Debate Orchestrator
 
