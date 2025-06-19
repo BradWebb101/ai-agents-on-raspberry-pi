@@ -96,13 +96,6 @@ This project is a modular, multi-agent debate and evaluation system that leverag
 - **Dockerfile**: Provided for containerized deployment.
 - **Requires**: An OpenAI API key set as `OPENAI_API_KEY` in your environment or `.env` file.
 
----
-
-## Evaluation
-
-- **evaluation/main.py**: Runs a set of philosophical and scientific questions through the agents and saves the results.
-
----
 
 ## Utilities
 
@@ -116,11 +109,13 @@ This project is a modular, multi-agent debate and evaluation system that leverag
 
 - **Docker** and **Docker Compose** installed
 - **Ollama** installed and running locally
-- **TinyLlama** model pulled for Ollama
+- **TinyLlama** model pulled for ollama tinyllama
+- **Normic Embedding** model pulled from ollama nomic-embed-text 
 - **OpenAI API Key** (required for MCP server)
 
   ```sh
-  ollama run tinyllama:1.1b
+  ollama run tinyllama
+  ollama run nomic-embed-text
   ```
 
   This will download and start the TinyLlama model, which is required for all agent LLM operations.
@@ -132,17 +127,6 @@ This project is a modular, multi-agent debate and evaluation system that leverag
   ```sh
   docker-compose up -d
   ```
-
-  Or use the provided script for a full startup and readiness check:
-
-  ```sh
-  ./start.sh
-  ```
-
-  This script will:
-  - Build and start all containers
-  - Wait for OIDC, SQLite API, and MCP server to be ready
-  - (Optionally) run the agent debate orchestrator
 
 ### 3. Populate Qdrant
 
@@ -166,21 +150,12 @@ This project is a modular, multi-agent debate and evaluation system that leverag
   python sql_mcp_agent/main.py
   ```
 
-- **Evaluation**:
-
-  ```sh
-  python evaluation/main.py
-  ```
-
----
-
 ## Main Debate Orchestrator
 
 The `agents/main.py` script serves as the entry point for orchestrating debates between agents. It uses the `SupervisorAgent` to manage the interaction between Philosophy, Science, and Summary agents. The script supports the following features:
 
 - **Initial Prompt**: Accepts an initial prompt from the user to guide the debate.
 - **Qdrant Integration**: By default, the agents use the Qdrant vector database for retrieval-augmented generation (RAG). This can be disabled by setting the environment variable `USE_QDRANT=0` or `USE_QDRANT=false`.
-- **Mock RAG**: Includes an option to use a mock RAG database for testing purposes (`--mock-rag` flag).
 
 To run the orchestrator:
 
@@ -188,13 +163,11 @@ To run the orchestrator:
 python agents/main.py
 ```
 
-You will be prompted to enter an initial prompt for the debate. Use the `--mock-rag` flag to disable the real database and use mock data instead.
-
 ---
 
 ## Notes
 
-- **Model**: All agents use TinyLlama via Ollama (`ollama run tinyllama:1.1b` must be running).
+- **Model**: All agents use TinyLlama via Ollama (`ollama run tinyllama` + `ollama run nomic-embed-text` must be running).
 - **Qdrant**: Data is persisted in `database/qdrant/data/`.
 - **Environment Variables**: Some scripts use `.env` for configuration. **You must set `OPENAI_API_KEY` to use the MCP server.**
 - **Extensibility**: Add new agents or data by following the patterns in the `agents/` and `database/qdrant/` directories.
