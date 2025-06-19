@@ -174,6 +174,24 @@ This project is a modular, multi-agent debate and evaluation system that leverag
 
 ---
 
+## Main Debate Orchestrator
+
+The `agents/main.py` script serves as the entry point for orchestrating debates between agents. It uses the `SupervisorAgent` to manage the interaction between Philosophy, Science, and Summary agents. The script supports the following features:
+
+- **Initial Prompt**: Accepts an initial prompt from the user to guide the debate.
+- **Qdrant Integration**: By default, the agents use the Qdrant vector database for retrieval-augmented generation (RAG). This can be disabled by setting the environment variable `USE_QDRANT=0` or `USE_QDRANT=false`.
+- **Mock RAG**: Includes an option to use a mock RAG database for testing purposes (`--mock-rag` flag).
+
+To run the orchestrator:
+
+```sh
+python agents/main.py
+```
+
+You will be prompted to enter an initial prompt for the debate. Use the `--mock-rag` flag to disable the real database and use mock data instead.
+
+---
+
 ## Notes
 
 - **Model**: All agents use TinyLlama via Ollama (`ollama run tinyllama:1.1b` must be running).
@@ -187,4 +205,4 @@ This project is a modular, multi-agent debate and evaluation system that leverag
 
 - [Qdrant Documentation](https://qdrant.tech/documentation/)
 - [Ollama Documentation](https://ollama.com/)
-- [LlamaIndex](https://github.com/jerryjliu/llama_index) 
+- [LlamaIndex](https://github.com/jerryjliu/llama_index)
