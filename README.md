@@ -1,4 +1,4 @@
-# Engineering Day: Multi-Agent Debate System
+# Engineering Day: ai-agents-on-raspberry-pi
 
 ## How to Run
 
